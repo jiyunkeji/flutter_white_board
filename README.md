@@ -1,6 +1,6 @@
 # white_board
 
-集成表白SDK
+集成白板SDK
 
 ## SDK地址
 
