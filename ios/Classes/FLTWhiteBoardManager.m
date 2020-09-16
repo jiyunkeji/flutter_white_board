@@ -64,6 +64,12 @@
     memberState.strokeColor= @[[NSNumber numberWithInt:r], [NSNumber numberWithInt:g], [NSNumber numberWithInt:b]];
     [self.room setMemberState:memberState];
 }
+-(void)joinSuccess:(FlutterMethodChannel *)methodChannel roomId:(nonnull NSString *)roomId{
+    NSDictionary *arguments = @{
+       @"roomId" : roomId,
+     };
+    [methodChannel invokeMethod:@"onJoinRoomSuccess" arguments:arguments];
+}
 
 #pragma WhiteRoomCallbackDelegate
 -(void)fireRoomStateChanged:(WhiteRoomState *)modifyState{

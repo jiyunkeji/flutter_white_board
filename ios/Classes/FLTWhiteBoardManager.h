@@ -8,6 +8,7 @@
 #import <Foundation/Foundation.h>
 #import "WhiteSDK.h"
 #import "FLTStrokeColor.h"
+#import <Flutter/Flutter.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -25,6 +26,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(void)setStrokeColor:(FLTStrokeColor *)color;
 - (void)initSDKWithAppId:(NSString *)appId;
 - (void)joinRoomWithToken:(NSString *)roomId tokenId:(NSString *)tokenId;
+-(void)joinSuccess:(FlutterMethodChannel *)methodChannel roomId:(NSString *)roomId;
 @end
 
 NS_ASSUME_NONNULL_END

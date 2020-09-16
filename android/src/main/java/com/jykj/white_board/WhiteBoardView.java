@@ -18,11 +18,11 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.platform.PlatformView;
 
-public class WhiteBoardView implements PlatformView, MethodChannel.MethodCallHandler, Callback ,EventChannel.StreamHandler{
+public class WhiteBoardView implements PlatformView, MethodChannel.MethodCallHandler, Callback, EventChannel.StreamHandler {
     WhiteboardView wb;
     private final MethodChannel methodChannel;
     private final EventChannel eventChannel;
-    private  EventChannel.EventSink eventSink;
+    private EventChannel.EventSink eventSink;
     private WhiteBoardManager wbManager;
     private Context context;
 
@@ -43,6 +43,7 @@ public class WhiteBoardView implements PlatformView, MethodChannel.MethodCallHan
         wbManager = WhiteBoardManager.getInstance();
         wbManager.setCallback(this);
         wbManager.setBoardView(wb);
+        wbManager.setMethodChannel(methodChannel);
 
     }
 
@@ -80,9 +81,10 @@ public class WhiteBoardView implements PlatformView, MethodChannel.MethodCallHan
         wbManager.setStrokeColor(color);
         result.success("");
     }
+
     private void init(MethodCall methodCall, MethodChannel.Result result) {
         Map<String, Object> request = (Map<String, Object>) methodCall.arguments;
-        String appId = (String)request.get("appId");
+        String appId = (String) request.get("appId");
 
         InitOptions options = new InitOptions();
         options.setAppId(appId);
@@ -90,15 +92,16 @@ public class WhiteBoardView implements PlatformView, MethodChannel.MethodCallHan
 
         result.success("");
     }
+
     private void joinRoom(MethodCall methodCall, MethodChannel.Result result) {
         Map<String, Object> request = (Map<String, Object>) methodCall.arguments;
 
-        String roomId = (String)request.get("roomId");
-        String roomToken = (String)request.get("roomToken");
+        String roomId = (String) request.get("roomId");
+        String roomToken = (String) request.get("roomToken");
         JoinRoomOptions joinRoomOptions = new JoinRoomOptions();
         joinRoomOptions.setRoomId(roomId);
         joinRoomOptions.setRoomToken(roomToken);
-        wbManager.joinRoom(joinRoomOptions,result);
+        wbManager.joinRoom(joinRoomOptions, result);
         // result.success("");
     }
 
@@ -135,7 +138,11 @@ public class WhiteBoardView implements PlatformView, MethodChannel.MethodCallHan
     @Override
     public void onJoinRoomSuccess(String roomId) {
 
-        if(eventSink!=null){
+        //方法1
+        wbManager.onJoinRoomSuccess(roomId);
+
+        //方法2
+        if (eventSink != null) {
             Map<String, Object> event = new HashMap<>();
             event.put("eventType", "joinRoomSuccess");
             event.put("roomId", roomId);

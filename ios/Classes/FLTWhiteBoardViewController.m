@@ -40,8 +40,6 @@
 
     self.manager = [[FLTWhiteBoardManager alloc]initWithWhiteBoardView:_whiteBoardView];
       self.manager.delegate = self;
-      // [self.manager initSDKWithAppId:@"ehuvwNLlEeqTIve5DWs2Gg/KheA3hZvWA8XEA"];
-      // [self.manager joinRoomWithToken:@"f31ed380d6e511ea9be4d9045066d16e" tokenId:@"WHITEcGFydG5lcl9pZD00NXRONWl5TWRWaDhYTjN1JnNpZz1jNGEwODEyOGE3MTYzOTQ2MGFkMWEwMmRkODY3ZTE5M2NhZjY5MGUwOmFrPTQ1dE41aXlNZFZoOFhOM3UmY3JlYXRlX3RpbWU9MTU5NjYwOTM3MDUzMSZleHBpcmVfdGltZT0xNjI4MTQ1MzcwNTMxJm5vbmNlPTE1OTY2MDkzNzA1MzEwMCZyb2xlPXJvb20mcm9vbUlkPWYzMWVkMzgwZDZlNTExZWE5YmU0ZDkwNDUwNjZkMTZlJnRlYW1JZD1laHV2d05MbEVlcVRJdmU1RFdzMkdn"];
  
     __weak __typeof__(self) weakSelf = self;
     [_channel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
@@ -119,6 +117,7 @@
 #pragma FLTWhiteBoardManagerDelegate
 -(void)joinRoomSuccessWithRoomId:(NSString *)roomId{
     
+    [_manager joinSuccess:_channel roomId:roomId];
     if(_eventSink){
         _eventSink(@{
            @"eventType" : @"joinRoomSuccess",

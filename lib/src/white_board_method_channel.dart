@@ -16,14 +16,12 @@ class WhiteBoardMethodChannel implements WhiteBoardPlatformController {
   }
 
   Future<bool> _onMethodCall(MethodCall call) async {
-    // switch (call.method) {
-    //   case 'javascriptChannelMessage':
-    //     final String channel = call.arguments['channel'];
-    //     final String message = call.arguments['message'];
-    //     _platformCallbacksHandler.onJavaScriptChannelMessage(channel, message);
-    //     return true;
-
-    // }
+    switch (call.method) {
+      case 'onJoinRoomSuccess':
+        final String roomId = call.arguments['roomId'];
+        _platformCallbacksHandler.onJoinRoomSuccess(roomId);
+        return true;
+    }
 
     return false;
   }

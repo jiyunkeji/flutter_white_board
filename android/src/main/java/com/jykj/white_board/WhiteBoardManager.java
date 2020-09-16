@@ -17,6 +17,9 @@ import com.herewhite.sdk.domain.RoomState;
 import com.herewhite.sdk.domain.SDKError;
 import com.herewhite.sdk.domain.UrlInterrupter;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import io.flutter.plugin.common.MethodChannel;
 
 public class WhiteBoardManager {
@@ -24,6 +27,8 @@ public class WhiteBoardManager {
     private WhiteboardView boardView;
 
     private Context context;
+
+    private  MethodChannel methodChannel;
 
     private WhiteSdk whiteSdk;
     private Room room;
@@ -54,6 +59,14 @@ public class WhiteBoardManager {
 
     public void setCallback(Callback callback) {
         this.callback = callback;
+    }
+
+    public MethodChannel getMethodChannel() {
+        return methodChannel;
+    }
+
+    public void setMethodChannel(MethodChannel methodChannel) {
+        this.methodChannel = methodChannel;
     }
 
     public static WhiteBoardManager getInstance() {
@@ -167,6 +180,12 @@ public class WhiteBoardManager {
         MemberState memberState = new MemberState();
         memberState.setStrokeColor(new int[]{r, g, b});
         room.setMemberState(memberState);
+    }
+
+    public void onJoinRoomSuccess( String roomId) {
+        Map<String, Object> args = new HashMap<>();
+        args.put("roomId", roomId);
+        methodChannel.invokeMethod("onJoinRoomSuccess", args);
     }
 }
 interface  Callback{
