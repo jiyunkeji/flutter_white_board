@@ -79,7 +79,7 @@ public class WhiteBoardView implements PlatformView, MethodChannel.MethodCallHan
         color.setB(b);
         color.setG(g);
         wbManager.setStrokeColor(color);
-        result.success("");
+        result.success(null);
     }
 
     private void init(MethodCall methodCall, MethodChannel.Result result) {
@@ -90,7 +90,7 @@ public class WhiteBoardView implements PlatformView, MethodChannel.MethodCallHan
         options.setAppId(appId);
         wbManager.init(context, options);
 
-        result.success("");
+        result.success(null);
     }
 
     private void joinRoom(MethodCall methodCall, MethodChannel.Result result) {

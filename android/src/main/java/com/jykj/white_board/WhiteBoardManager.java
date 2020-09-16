@@ -151,7 +151,7 @@ public class WhiteBoardManager {
             @Override
             public void then(Room wRoom) {
 
-                result.success("");
+                result.success(null);
                 room = wRoom;
                 if(getCallback()!=null){
                     getCallback().onJoinRoomSuccess(wRoom.getObserverId()+"");
@@ -163,7 +163,7 @@ public class WhiteBoardManager {
 
             @Override
             public void catchEx(SDKError t) {
-                result.success("");
+                result.error("joinRoomErr",t.getMessage(),t.getStackTrace());
                 Log.e("2", t.getMessage());
             }
         });
