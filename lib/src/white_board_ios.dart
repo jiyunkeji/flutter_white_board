@@ -13,10 +13,10 @@ import 'package:white_board/src/white_board_method_channel.dart';
 /// communicate with the platform code.
 class IosWhiteBoardView implements WhiteBoardViewPlatform {
   @override
-  Widget build({
-    BuildContext context,
-    WhiteBoardViewPlatformCreatedCallback onWhiteBoardViewPlatformCreated,
-  }) {
+  Widget build(
+      {BuildContext context,
+      WhiteBoardViewPlatformCreatedCallback onWhiteBoardViewPlatformCreated,
+      WhiteBoardPlatformCallbacksHandler callbacksHandler}) {
     return GestureDetector(
       onLongPress: () {},
       excludeFromSemantics: true,
@@ -26,7 +26,9 @@ class IosWhiteBoardView implements WhiteBoardViewPlatform {
           if (onWhiteBoardViewPlatformCreated == null) {
             return;
           }
-          onWhiteBoardViewPlatformCreated(WhiteBoardMethodChannel(id));
+          print("ios:$id");
+          onWhiteBoardViewPlatformCreated(
+              WhiteBoardMethodChannel(id, callbacksHandler));
         },
       ),
     );

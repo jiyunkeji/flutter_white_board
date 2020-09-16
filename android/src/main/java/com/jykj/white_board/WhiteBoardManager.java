@@ -17,6 +17,8 @@ import com.herewhite.sdk.domain.RoomState;
 import com.herewhite.sdk.domain.SDKError;
 import com.herewhite.sdk.domain.UrlInterrupter;
 
+import io.flutter.plugin.common.MethodChannel;
+
 public class WhiteBoardManager {
     private static WhiteBoardManager _instance;
     private WhiteboardView boardView;
@@ -44,6 +46,16 @@ public class WhiteBoardManager {
         this.boardView = boardView;
     }
 
+    private  Callback callback;
+
+    public Callback getCallback() {
+        return callback;
+    }
+
+    public void setCallback(Callback callback) {
+        this.callback = callback;
+    }
+
     public static WhiteBoardManager getInstance() {
 
         if (_instance == null) {
@@ -60,22 +72,13 @@ public class WhiteBoardManager {
     }
 
     public void init(Context context, InitOptions options) {
-//          whiteBroadView.addView(whiteboardView);
         Log.e("2","boardView"+getBoardView());
         this.context = context;
         String appId = options.getAppId();//ehuvwNLlEeqTIve5DWs2Gg/KheA3hZvWA8XEA
 
         WhiteSdkConfiguration sdkConfiguration = new WhiteSdkConfiguration(appId, true);
 
-        /*显示用户头像*/
         sdkConfiguration.setUserCursor(true);
-
-        //动态 ppt 需要的自定义字体，如果没有使用，无需调用
-//          HashMap<String, String> map = new HashMap<>();
-//          map.put("宋体","https://your-cdn.com/Songti.ttf");
-//          sdkConfiguration.setFonts(map);
-
-        //图片替换 API，需要在 whiteSDKConfig 中先行调用 setHasUrlInterrupterAPI，进行设置，否则不会被回调。
         whiteSdk = new WhiteSdk(getBoardView(), context, sdkConfiguration,
                 new UrlInterrupter() {
                     @Override
@@ -83,9 +86,6 @@ public class WhiteBoardManager {
                         return sourceUrl;
                     }
                 });
-
-        /** 设置自定义全局状态，在后续回调中 GlobalState 直接进行类型转换即可 */
-//          WhiteDisplayerState.setCustomGlobalStateClass(this.context);
 
         whiteSdk.setCommonCallbacks(new CommonCallbacks() {
             @Override
@@ -116,8 +116,7 @@ public class WhiteBoardManager {
 
     }
 
-    public  void joinRoom(JoinRoomOptions options){
-        //如需支持用户头像，请在设置 WhiteSdkConfiguration 后，再调用 setUserPayload 方法，传入符合用户信息
+    public  void joinRoom(JoinRoomOptions options, final MethodChannel.Result result){
         String roomId = options.getRoomId();
         String roomToken = options.getRoomToken();
         RoomParams roomParams = new RoomParams(roomId, roomToken);
@@ -125,8 +124,6 @@ public class WhiteBoardManager {
         whiteSdk.joinRoom(roomParams, new AbstractRoomCallbacks() {
             @Override
             public void onPhaseChanged(RoomPhase phase) {
-                //在此处可以处理断连后的重连逻辑
-//                  showToast(phase.name());
                 Log.e("2",phase.name());
 
             }
@@ -140,7 +137,12 @@ public class WhiteBoardManager {
         }, new Promise<Room>() {
             @Override
             public void then(Room wRoom) {
+
+                result.success("");
                 room = wRoom;
+                if(getCallback()!=null){
+                    getCallback().onJoinRoomSuccess(wRoom.getObserverId()+"");
+                }
                 if (getStrokeColor()!=null){
                     setRoomStrokeColor(getStrokeColor());
                 }
@@ -148,6 +150,7 @@ public class WhiteBoardManager {
 
             @Override
             public void catchEx(SDKError t) {
+                result.success("");
                 Log.e("2", t.getMessage());
             }
         });
@@ -166,7 +169,9 @@ public class WhiteBoardManager {
         room.setMemberState(memberState);
     }
 }
-
+interface  Callback{
+    void onJoinRoomSuccess(String roomId);
+}
 class  StrokeColor{
     private  int r;
     private  int g;

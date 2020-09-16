@@ -8,16 +8,21 @@ import androidx.annotation.NonNull;
 
 import com.herewhite.sdk.WhiteboardView;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import io.flutter.plugin.common.BinaryMessenger;
+import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
+import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.platform.PlatformView;
 
-public class WhiteBoardView implements PlatformView, MethodChannel.MethodCallHandler {
+public class WhiteBoardView implements PlatformView, MethodChannel.MethodCallHandler, Callback ,EventChannel.StreamHandler{
     WhiteboardView wb;
     private final MethodChannel methodChannel;
+    private final EventChannel eventChannel;
+    private  EventChannel.EventSink eventSink;
     private WhiteBoardManager wbManager;
     private Context context;
 
@@ -29,21 +34,16 @@ public class WhiteBoardView implements PlatformView, MethodChannel.MethodCallHan
                           View containerView) {
         this.context = context;
         wb = new WhiteboardView(context);
-
-        InitOptions options = new InitOptions();
-        options.setAppId("ehuvwNLlEeqTIve5DWs2Gg/KheA3hZvWA8XEA");
-        wbManager = WhiteBoardManager.getInstance();
-        wbManager.setBoardView(wb);
-        wbManager.init(context, options);
-        wbManager.setBoardView(wb);
-
-        JoinRoomOptions joinRoomOptions = new JoinRoomOptions();
-        joinRoomOptions.setRoomId("f31ed380d6e511ea9be4d9045066d16e");
-        joinRoomOptions.setRoomToken("WHITEcGFydG5lcl9pZD00NXRONWl5TWRWaDhYTjN1JnNpZz1jNGEwODEyOGE3MTYzOTQ2MGFkMWEwMmRkODY3ZTE5M2NhZjY5MGUwOmFrPTQ1dE41aXlNZFZoOFhOM3UmY3JlYXRlX3RpbWU9MTU5NjYwOTM3MDUzMSZleHBpcmVfdGltZT0xNjI4MTQ1MzcwNTMxJm5vbmNlPTE1OTY2MDkzNzA1MzEwMCZyb2xlPXJvb20mcm9vbUlkPWYzMWVkMzgwZDZlNTExZWE5YmU0ZDkwNDUwNjZkMTZlJnRlYW1JZD1laHV2d05MbEVlcVRJdmU1RFdzMkdn");
-        wbManager.joinRoom(joinRoomOptions);
-
         methodChannel = new MethodChannel(messenger, "com.jykj.white_board/textView_" + id);
         methodChannel.setMethodCallHandler(this);
+
+        eventChannel = new EventChannel(messenger, "com.jykj.white_board/textView_event_" + id);
+        eventChannel.setStreamHandler(this);
+
+        wbManager = WhiteBoardManager.getInstance();
+        wbManager.setCallback(this);
+        wbManager.setBoardView(wb);
+
     }
 
     @Override
@@ -53,6 +53,14 @@ public class WhiteBoardView implements PlatformView, MethodChannel.MethodCallHan
             case "setStrokeColor":
 
                 setStrokeColor(call, result);
+                break;
+            case "init":
+
+                init(call, result);
+                break;
+            case "joinRoom":
+
+                joinRoom(call, result);
                 break;
             default:
                 result.notImplemented();
@@ -70,7 +78,28 @@ public class WhiteBoardView implements PlatformView, MethodChannel.MethodCallHan
         color.setB(b);
         color.setG(g);
         wbManager.setStrokeColor(color);
-        result.success(null);
+        result.success("");
+    }
+    private void init(MethodCall methodCall, MethodChannel.Result result) {
+        Map<String, Object> request = (Map<String, Object>) methodCall.arguments;
+        String appId = (String)request.get("appId");
+
+        InitOptions options = new InitOptions();
+        options.setAppId(appId);
+        wbManager.init(context, options);
+
+        result.success("");
+    }
+    private void joinRoom(MethodCall methodCall, MethodChannel.Result result) {
+        Map<String, Object> request = (Map<String, Object>) methodCall.arguments;
+
+        String roomId = (String)request.get("roomId");
+        String roomToken = (String)request.get("roomToken");
+        JoinRoomOptions joinRoomOptions = new JoinRoomOptions();
+        joinRoomOptions.setRoomId(roomId);
+        joinRoomOptions.setRoomToken(roomToken);
+        wbManager.joinRoom(joinRoomOptions,result);
+        // result.success("");
     }
 
     @Override
@@ -101,5 +130,28 @@ public class WhiteBoardView implements PlatformView, MethodChannel.MethodCallHan
     @Override
     public void onInputConnectionUnlocked() {
 
+    }
+
+    @Override
+    public void onJoinRoomSuccess(String roomId) {
+
+        if(eventSink!=null){
+            Map<String, Object> event = new HashMap<>();
+            event.put("eventType", "joinRoomSuccess");
+            event.put("roomId", roomId);
+            eventSink.success(event);
+        }
+
+    }
+
+    @Override
+    public void onListen(Object arguments, EventChannel.EventSink events) {
+
+        eventSink = events;
+    }
+
+    @Override
+    public void onCancel(Object arguments) {
+        eventSink = null;
     }
 }

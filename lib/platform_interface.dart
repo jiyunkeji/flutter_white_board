@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 
 abstract class WhiteBoardViewPlatform {
   Widget build(
       {BuildContext context,
-      WhiteBoardViewPlatformCreatedCallback onWhiteBoardViewPlatformCreated});
+      WhiteBoardViewPlatformCreatedCallback onWhiteBoardViewPlatformCreated,
+      WhiteBoardPlatformCallbacksHandler callbacksHandler});
 }
 
 typedef WhiteBoardViewPlatformCreatedCallback = void Function(
@@ -18,4 +21,23 @@ abstract class WhiteBoardPlatformController {
     throw UnimplementedError(
         "WhiteBoard setTitle is not implemented on the current platform");
   }
+
+  Future<void> init(
+    String appId,
+  ) {
+    throw UnimplementedError(
+        "WhiteBoard init is not implemented on the current platform");
+  }
+
+  Future<void> joinRoom(
+    String roomId,
+    String roomToken,
+  ) {
+    throw UnimplementedError(
+        "WhiteBoard joinRoom is not implemented on the current platform");
+  }
+}
+
+abstract class WhiteBoardPlatformCallbacksHandler {
+  void onJoinRoomSuccess(String roomId);
 }

@@ -5,11 +5,13 @@ import 'package:white_board/src/white_board_android.dart';
 import 'package:white_board/src/white_board_ios.dart';
 
 typedef void WhiteBoardViewCreatedCallback(WhiteBoardViewController controller);
+typedef void JoinRoomSuccessCallBack(String roomId);
 
 class WhiteBoard extends StatefulWidget {
-  const WhiteBoard({this.onWhiteBoardViewCreated});
+  const WhiteBoard({this.onWhiteBoardViewCreated, this.onJoinRoomSuccess});
 
   final WhiteBoardViewCreatedCallback onWhiteBoardViewCreated;
+  final JoinRoomSuccessCallBack onJoinRoomSuccess;
 
   static WhiteBoardViewPlatform _platform;
 
@@ -41,12 +43,13 @@ class WhiteBoard extends StatefulWidget {
 }
 
 class _WhiteBoardState extends State<WhiteBoard> {
+  _PlatformCallbacksHandler _platformCallbacksHandler;
   @override
   Widget build(BuildContext context) {
     return WhiteBoard.platform.build(
-      context: context,
-      onWhiteBoardViewPlatformCreated: _onWhiteBoardViewPlatformCreated,
-    );
+        context: context,
+        onWhiteBoardViewPlatformCreated: _onWhiteBoardViewPlatformCreated,
+        callbacksHandler: _platformCallbacksHandler);
   }
 
   void _onWhiteBoardViewPlatformCreated(
@@ -55,15 +58,20 @@ class _WhiteBoardState extends State<WhiteBoard> {
         WhiteBoardViewController._(whiteBoardViewPlatform);
     if (widget.onWhiteBoardViewCreated != null) {
       widget.onWhiteBoardViewCreated(controller);
-      print("_onWhiteBoardViewPlatformCreated");
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _platformCallbacksHandler = _PlatformCallbacksHandler(widget);
   }
 }
 
 class WhiteBoardViewController {
   WhiteBoardViewController._(
     this._whiteBoardViewPlatformController,
-  ) : assert(_whiteBoardViewPlatformController != null) {}
+  ) : assert(_whiteBoardViewPlatformController != null);
 
   final WhiteBoardPlatformController _whiteBoardViewPlatformController;
 
@@ -72,6 +80,28 @@ class WhiteBoardViewController {
     int g,
     int b,
   ) async {
-    return _whiteBoardViewPlatformController.setStrokeColor(r, g, b);
+    return await _whiteBoardViewPlatformController.setStrokeColor(r, g, b);
+  }
+
+  Future<void> init(
+    String appId,
+  ) async {
+    return await _whiteBoardViewPlatformController.init(appId);
+  }
+
+  Future<void> joinRoom(
+    String roomId,
+    String roomToken,
+  ) async {
+    return await _whiteBoardViewPlatformController.joinRoom(roomId, roomToken);
+  }
+}
+
+class _PlatformCallbacksHandler implements WhiteBoardPlatformCallbacksHandler {
+  _PlatformCallbacksHandler(this._widget);
+  WhiteBoard _widget;
+  @override
+  void onJoinRoomSuccess(String roomId) {
+    _widget.onJoinRoomSuccess(roomId);
   }
 }
